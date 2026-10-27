@@ -7,7 +7,7 @@ Eine kleine iOS-App, die StikDebug mit `universal.js` für ihren laufenden Proze
 1. Die IPA aus dem GitHub-Actions-Artefakt herunterladen.
 2. Die IPA in LiveContainer importieren. Für die App „Launch with JIT“ aktivieren und `universal.js` als JIT-Launch-Skript auswählen.
 3. In LiveContainer „Use LiveContainer's Bundle ID“ einschalten, falls StikDebug die App nicht zurückfindet.
-4. Die App starten und „JIT aktivieren & testen“ antippen. StikDebug muss bereits gekoppelt und einsatzbereit sein.
+4. Die App starten und „StikDebug öffnen & JIT aktivieren“ antippen. Aktiviere JIT in StikDebug, kehre zurück und tippe „JIT jetzt testen“.
 
 Die App prüft `CS_DEBUGGED`, bevor sie den Breakpoint an `universal.js` sendet. Ohne aktiven Debugger wird der Breakpoint nicht ausgeführt, damit die App nicht durch einen unbehandelten `brk` abstürzt.
 

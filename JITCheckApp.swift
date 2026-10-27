@@ -12,7 +12,7 @@ struct JITCheckApp: App {
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var message = "Bereit für den JIT-Test."
-    @State private var busy = false
+    @State private var openingStikDebug = false
 
     var body: some View {
         VStack(spacing: 22) {
@@ -25,12 +25,19 @@ struct ContentView: View {
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
             Button(action: start) {
-                Label("JIT aktivieren & testen", systemImage: "play.fill")
+                Label("StikDebug öffnen & JIT aktivieren", systemImage: "arrow.up.right.square")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)
-            .disabled(busy)
+            .disabled(openingStikDebug)
+            Button(action: runTest) {
+                Label("JIT jetzt testen", systemImage: "play.fill")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+            }
+            .buttonStyle(.bordered)
+            .disabled(openingStikDebug)
             Text(message)
                 .font(.callout)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -44,19 +51,24 @@ struct ContentView: View {
         }
         .padding(24)
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active && busy {
-                // Give StikDebug a moment to finish attaching before we inspect the task.
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { runTest() }
+            if phase == .active && openingStikDebug {
+                // Some LiveContainer versions don't deliver UIApplication.open's
+                // completion consistently when switching between app containers.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    guard openingStikDebug else { return }
+                    openingStikDebug = false
+                    message = "Zurück aus StikDebug. Tippe jetzt auf „JIT jetzt testen“."
+                }
             }
         }
     }
 
     private func start() {
-        busy = true
+        openingStikDebug = true
         message = "StikDebug wird geöffnet …"
         guard let bundleID = Bundle.main.bundleIdentifier,
               var parts = URLComponents(string: "stikdebug://enable-jit") else {
-            busy = false
+            openingStikDebug = false
             message = "Fehler: Bundle-ID oder StikDebug-URL fehlt."
             return
         }
@@ -66,24 +78,38 @@ struct ContentView: View {
             URLQueryItem(name: "script-name", value: "universal.js")
         ]
         guard let url = parts.url else {
-            busy = false
+            openingStikDebug = false
             message = "Fehler: StikDebug-URL konnte nicht erstellt werden."
             return
         }
         UIApplication.shared.open(url) { opened in
-            if !opened {
-                busy = false
-                message = "StikDebug konnte nicht geöffnet werden. Prüfe Installation, Pairing und LiveContainer-Konfiguration."
+            DispatchQueue.main.async {
+                openingStikDebug = false
+                if opened {
+                    message = "StikDebug wurde geöffnet. Aktiviere dort JIT und tippe nach der Rückkehr auf „JIT jetzt testen“."
+                } else {
+                    message = "StikDebug konnte nicht geöffnet werden. Prüfe Installation, Pairing und LiveContainer-Konfiguration."
+                }
             }
         }
     }
 
     private func runTest() {
-        guard busy else { return }
+        message = "JIT wird geprüft …"
         let status = JITCheckRun()
-        busy = false
-        message = status == 42
-            ? "✅ JIT funktioniert. Der dynamische ARM64-Code hat 42 zurückgegeben."
-            : "❌ JIT-Test fehlgeschlagen (Status \(status)). Prüfe StikDebug, universal.js und „Use LiveContainer’s Bundle ID“."
+        switch status {
+        case 42:
+            message = "✅ JIT funktioniert. Der dynamische ARM64-Code hat 42 zurückgegeben."
+        case -1:
+            message = "❌ Dieser Test benötigt ein ARM64-iPhone oder iPad."
+        case -2:
+            message = "❌ StikDebug hat diesen App-Prozess nicht als Debugger markiert. Prüfe „Use LiveContainer’s Bundle ID“ und starte die App über LiveContainer mit JIT."
+        case -3:
+            message = "❌ JIT-Test: Es konnte keine Test-Speicherseite angelegt werden."
+        case -4:
+            message = "❌ universal.js hat die Test-Speicherseite nicht vorbereitet. Prüfe das ausgewählte Skript und aktiviere JIT erneut."
+        default:
+            message = "❌ JIT-Test fehlgeschlagen (Status \(status))."
+        }
     }
 }
