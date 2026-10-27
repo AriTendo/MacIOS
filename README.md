@@ -9,7 +9,7 @@ Eine kleine iOS-App, die beim Start einen ARM64-Codeblock vorbereitet und ausfü
 3. JITCheck direkt über LiveContainer starten. Nicht erst in JITCheck zu StikDebug wechseln und danach den Testknopf drücken: Das Skript kann zu diesem Zeitpunkt bereits vom Prozess getrennt sein.
 4. Die App zeigt nach dem Start an, ob der Testcode `42` zurückgegeben hat oder welche Vorbedingung fehlte.
 
-Der Test wartet bis zu fünf Sekunden auf den Debugger-Attach. Ohne erkannten Debugger wird kein `BRK` ausgeführt. Bei einem JIT-Start mit aktivem Debugger führt die App den Breakpoint-Test einmalig während des Starts aus.
+Der Test wartet bis zu fünf Sekunden auf einen aktiven Debugger und prüft zusätzlich, dass der Prozess noch tatsächlich verfolgt wird. Ohne diese beiden Bedingungen wird kein `BRK` ausgeführt. Bei einem JIT-Start mit aktivem Debugger fordert die App über `universal.js` eine RX-Seite an, erstellt dafür einen getrennten RW-Alias, schreibt den Code, lässt das Skript kontrolliert detach-en und führt erst danach den Code aus.
 
 ## Build
 

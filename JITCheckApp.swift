@@ -71,6 +71,8 @@ struct ContentView: View {
                         message = "❌ Es konnte keine Test-Speicherseite angelegt werden."
                     case -4:
                         message = "❌ universal.js hat die Test-Speicherseite nicht vorbereitet. Prüfe das ausgewählte Skript und starte die App erneut mit JIT."
+                    case -5:
+                        message = "❌ Die Debugger-Verbindung wurde vor Abschluss der Vorbereitung getrennt. Starte JITCheck erneut über LiveContainer mit universal.js."
                     default:
                         message = "❌ JIT-Test fehlgeschlagen (Status \(status))."
                     }
