@@ -16,16 +16,31 @@ jobs:
         run: xcodebuild -version
 
       - name: Build app for iOS devices
-        run: >-
-          xcodebuild
-          -project JITCheck.xcodeproj
-          -scheme JITCheck
-          -configuration Release
-          -sdk iphoneos
-          -destination 'generic/platform=iOS'
-          -derivedDataPath build/DerivedData
-          CODE_SIGNING_ALLOWED=NO
-          build
+        run: |
+          mkdir -p build
+          set +e
+          xcodebuild \
+            -project JITCheck.xcodeproj \
+            -scheme JITCheck \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build > build/xcodebuild.log 2>&1
+          result=$?
+          tail -n 100 build/xcodebuild.log
+          exit "$result"
+
+      - name: Report Xcode diagnostics
+        if: failure()
+        run: |
+          if [ -f build/xcodebuild.log ]; then
+            grep -E 'error:|fatal error:|warning:|BUILD FAILED|Error Domain=' build/xcodebuild.log | tail -n 40 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            tail -n 100 build/xcodebuild.log >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Package IPA
         run: |
