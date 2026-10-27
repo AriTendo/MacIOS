@@ -37,7 +37,6 @@ struct ContentView: View {
                     .padding(.vertical, 8)
             }
             .buttonStyle(.bordered)
-            .disabled(openingStikDebug)
             Text(message)
                 .font(.callout)
                 .frame(maxWidth: .infinity, alignment: .leading)
