@@ -94,6 +94,12 @@ struct ContentView: View {
     }
 
     private func runTest() {
+        let osVersion = ProcessInfo.processInfo.operatingSystemVersion
+        guard osVersion.majorVersion < 27 else {
+            message = "⚠️ Der echte BRK/JIT-Test ist auf iOS 27 vorerst gesperrt. Bei fehlendem StikDebug-Skript-Handler kann der Trap die App abstürzen lassen. Aktualisiere StikDebug/LiveContainer und warte auf bestätigte iOS-27-Unterstützung."
+            return
+        }
+
         message = "JIT wird geprüft …"
         let status = JITCheckRun()
         switch status {

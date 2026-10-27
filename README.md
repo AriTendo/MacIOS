@@ -11,6 +11,8 @@ Eine kleine iOS-App, die StikDebug mit `universal.js` für ihren laufenden Proze
 
 Die App prüft `CS_DEBUGGED`, bevor sie den Breakpoint an `universal.js` sendet. Ohne aktiven Debugger wird der Breakpoint nicht ausgeführt, damit die App nicht durch einen unbehandelten `brk` abstürzt.
 
+Auf iOS 27 ist der echte BRK/JIT-Test vorübergehend gesperrt. Es gibt StikDebug-Berichte über fehlgeschlagenes Debugger-Attach auf iOS 27; ein unbehandelter Trap kann die App beenden.
+
 ## Build
 
 Der GitHub-Actions-Workflow unter `.github/workflows/ios-build.yml` baut auf einem macOS-Runner und legt `JITCheck.ipa` als Actions-Artefakt ab. Dazu den Inhalt dieses Ordners in ein GitHub-Repository pushen und den Workflow unter **Actions → Build iOS app → Run workflow** starten. Die IPA ist unsigniert; LiveContainer muss sie beim Import passend signieren. Dieses Projekt wurde auf Linux erstellt; dort sind weder Xcode noch iOS SDK verfügbar, daher kann hier keine iOS-App/IPA gelinkt werden.
