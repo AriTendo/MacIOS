@@ -1,5 +1,6 @@
 #include "JITCheck.h"
 #include <mach/mach.h>
+#include <libkern/OSCacheControl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdint.h>

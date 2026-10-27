@@ -10,7 +10,7 @@ jobs:
     runs-on: macos-15
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Show Xcode version
         run: xcodebuild -version
@@ -50,7 +50,7 @@ jobs:
           /usr/bin/zip -qry JITCheck.ipa Payload
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: JITCheck-unsigned-IPA
           path: build/JITCheck.ipa
