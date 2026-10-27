@@ -1,0 +1,31 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+		A10000000000000000000001 /* Project object */ = {isa = PBXProject; attributes = {LastUpgradeCheck = 1600; LastSwiftUpdateCheck = 1600; }; buildConfigurationList = A10000000000000000000002; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, de, Base, ); mainGroup = A10000000000000000000003; productRefGroup = A1000000000000000000000C; projectDirPath = ""; projectRoot = ""; targets = (A10000000000000000000005, ); };
+		A10000000000000000000003 /* Main group */ = {isa = PBXGroup; children = (A10000000000000000000006 /* JITCheckApp.swift */, A10000000000000000000007 /* JITCheck.c */, A10000000000000000000008 /* JITCheck.h */, A10000000000000000000009 /* JITCheck-Bridging-Header.h */, A1000000000000000000000A /* Info.plist */, A1000000000000000000000B /* JITCheck.entitlements */, A1000000000000000000000C /* Products */, ); sourceTree = "<group>"; };
+		A1000000000000000000000C /* Products */ = {isa = PBXGroup; name = Products; children = (A1000000000000000000000D /* JITCheck.app */, ); sourceTree = "<group>"; };
+		A10000000000000000000005 /* JITCheck */ = {isa = PBXNativeTarget; buildConfigurationList = A1000000000000000000000E; buildPhases = (A1000000000000000000000F /* Sources */, A10000000000000000000010 /* Frameworks */, A10000000000000000000011 /* Resources */, ); buildRules = (); dependencies = (); name = JITCheck; productName = JITCheck; productReference = A1000000000000000000000D; productType = "com.apple.product-type.application"; };
+		A10000000000000000000006 /* JITCheckApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JITCheckApp.swift; sourceTree = "<group>"; };
+		A10000000000000000000007 /* JITCheck.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = JITCheck.c; sourceTree = "<group>"; };
+		A10000000000000000000008 /* JITCheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JITCheck.h; sourceTree = "<group>"; };
+		A10000000000000000000009 /* JITCheck-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "JITCheck-Bridging-Header.h"; sourceTree = "<group>"; };
+		A1000000000000000000000A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1000000000000000000000B /* JITCheck.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = JITCheck.entitlements; sourceTree = "<group>"; };
+		A1000000000000000000000D /* JITCheck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JITCheck.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000012 /* JITCheckApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000006; };
+		A10000000000000000000013 /* JITCheck.c in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000007; };
+		A1000000000000000000000F /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000012, A10000000000000000000013, ); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000010 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000011 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000002 /* Project config list */ = {isa = XCConfigurationList; buildConfigurations = (A10000000000000000000014, A10000000000000000000015, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A1000000000000000000000E /* Target config list */ = {isa = XCConfigurationList; buildConfigurations = (A10000000000000000000016, A10000000000000000000017, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A10000000000000000000014 /* Debug project */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Debug; };
+		A10000000000000000000015 /* Release project */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Release; };
+		A10000000000000000000016 /* Debug target */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_ENTITLEMENTS = JITCheck.entitlements; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = de.artur.jitcheck; PRODUCT_NAME = JITCheck; SWIFT_OBJC_BRIDGING_HEADER = "JITCheck-Bridging-Header.h"; SWIFT_EMIT_LOC_STRINGS = YES; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
+		A10000000000000000000017 /* Release target */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_ENTITLEMENTS = JITCheck.entitlements; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = de.artur.jitcheck; PRODUCT_NAME = JITCheck; SWIFT_OBJC_BRIDGING_HEADER = "JITCheck-Bridging-Header.h"; SWIFT_EMIT_LOC_STRINGS = YES; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
+	};
+	rootObject = A10000000000000000000001 /* Project object */;
+}
