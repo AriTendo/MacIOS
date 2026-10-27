@@ -1,58 +1,113 @@
-name: Build iOS app
+name: Build MacIOS
 
 on:
   workflow_dispatch:
   push:
     branches: [main, master]
+    paths-ignore:
+      - '**.md'
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    runs-on: macos-15
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v5
+    name: Build iOS QEMU app
+    runs-on: macos-26
+    timeout-minutes: 360
 
-      - name: Show Xcode version
+    steps:
+      - name: Check out MacIOS
+        uses: actions/checkout@v4
+
+      - name: Check out UTM and QEMU source
+        uses: actions/checkout@v4
+        with:
+          repository: utmapp/UTM
+          ref: v5.0.8
+          path: UTM
+          submodules: recursive
+
+      - name: Select Xcode
         run: xcodebuild -version
 
-      - name: Build app for iOS devices
+      - name: Install UTM build dependencies
         run: |
-          mkdir -p build
-          set +e
-          xcodebuild \
-            -project JITCheck.xcodeproj \
-            -scheme JITCheck \
-            -configuration Release \
-            -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            -derivedDataPath build/DerivedData \
-            CODE_SIGNING_ALLOWED=NO \
-            build > build/xcodebuild.log 2>&1
-          result=$?
-          tail -n 100 build/xcodebuild.log
-          exit "$result"
+          brew install bison pkg-config gettext glib libgpg-error nasm meson cmake \
+            llvm spirv-llvm-translator libxcb libxrandr ldid
+          for formula in bison gettext glib libgpg-error llvm spirv-llvm-translator libxcb libxrandr; do
+            echo "$(brew --prefix "$formula")/bin" >> "$GITHUB_PATH"
+          done
+          python3 -m venv "$RUNNER_TEMP/macios-venv"
+          "$RUNNER_TEMP/macios-venv/bin/python" -m pip install \
+            six pyparsing setuptools pyyaml distlib mako
+          echo "$RUNNER_TEMP/macios-venv/bin" >> "$GITHUB_PATH"
 
-      - name: Report Xcode diagnostics
-        if: failure()
-        run: |
-          if [ -f build/xcodebuild.log ]; then
-            grep -E 'error:|fatal error:|warning:|BUILD FAILED|Error Domain=' build/xcodebuild.log | tail -n 40 | while IFS= read -r line; do
-              echo "::error::$line"
-            done
-            tail -n 100 build/xcodebuild.log >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      - name: Package IPA
-        run: |
-          mkdir -p build/Payload
-          cp -R build/DerivedData/Build/Products/Release-iphoneos/JITCheck.app build/Payload/
-          cd build
-          /usr/bin/zip -qry JITCheck.ipa Payload
-
-      - name: Upload IPA artifact
-        uses: actions/upload-artifact@v7
+      - name: Restore iOS QEMU sysroot cache
+        id: sysroot-cache
+        uses: actions/cache@v4
         with:
-          name: JITCheck-unsigned-IPA
-          path: build/JITCheck.ipa
+          path: UTM/sysroot-ios-arm64
+          key: utm-v5.0.8-ios-arm64-${{ hashFiles('UTM/scripts/build_dependencies.sh', 'UTM/scripts/fixup.sh', 'UTM/patches/**') }}
+
+      - name: Build QEMU and iOS dependencies
+        if: steps.sysroot-cache.outputs.cache-hit != 'true'
+        working-directory: UTM
+        env:
+          NCPU: 4
+        run: ./scripts/build_dependencies.sh -p ios -a arm64
+
+      - name: Build the UTM iOS app
+        working-directory: UTM
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/build"
+          ./scripts/build_utm.sh \
+            -k iphoneos \
+            -s iOS \
+            -a arm64 \
+            -o "$GITHUB_WORKSPACE/build/MacIOS"
+
+      - name: Set the app display name to MacIOS
+        run: |
+          APP="$GITHUB_WORKSPACE/build/MacIOS.xcarchive/Products/Applications/UTM.app"
+          test -d "$APP"
+          python3 - "$APP/Info.plist" <<'PY'
+          import plistlib, sys
+          from pathlib import Path
+          info_path = Path(sys.argv[1])
+          with info_path.open("rb") as source:
+              info = plistlib.load(source)
+          info["CFBundleDisplayName"] = "MacIOS"
+          info["CFBundleName"] = "MacIOS"
+          with info_path.open("wb") as target:
+              plistlib.dump(info, target)
+          PY
+
+      - name: Package unsigned IPA for sideloading
+        working-directory: UTM
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/build/ipa"
+          ./scripts/package.sh ipa \
+            "$GITHUB_WORKSPACE/build/MacIOS.xcarchive" \
+            "$GITHUB_WORKSPACE/build/ipa"
+          mv "$GITHUB_WORKSPACE/build/ipa/UTM.ipa" \
+             "$GITHUB_WORKSPACE/build/ipa/MacIOS.ipa"
+
+      - name: Save build details
+        run: |
+          {
+            echo "MacIOS build based on utmapp/UTM v5.0.8"
+            echo "UTM source: https://github.com/utmapp/UTM/tree/v5.0.8"
+            echo "QEMU source: https://github.com/utmapp/qemu"
+            echo "This IPA contains no macOS installer, firmware, or ROM image."
+          } > "$GITHUB_WORKSPACE/build/BUILD-INFO.txt"
+
+      - name: Upload MacIOS IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacIOS-iOS-IPA
+          path: |
+            build/ipa/MacIOS.ipa
+            build/BUILD-INFO.txt
           if-no-files-found: error
           retention-days: 14
