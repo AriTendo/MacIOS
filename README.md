@@ -1,18 +1,16 @@
 # JIT Check
 
-Eine kleine iOS-App, die StikDebug mit `universal.js` für ihren laufenden Prozess aufruft und danach eine vorbereitete ARM64-Speicherseite ausführt. Der Testcode gibt `42` zurück.
+Eine kleine iOS-App, die beim Start einen ARM64-Codeblock vorbereitet und ausführt. Der Test läuft automatisch beim App-Start, damit `universal.js` den dafür nötigen Breakpoint während des JIT-Starts behandeln kann. Es gibt keinen manuellen Trap-Aufruf nach dem Wechsel zu StikDebug.
 
 ## LiveContainer
 
-1. Die IPA aus dem GitHub-Actions-Artefakt herunterladen.
-2. Die IPA in LiveContainer importieren. Für die App „Launch with JIT“ aktivieren und `universal.js` als JIT-Launch-Skript auswählen.
-3. In LiveContainer „Use LiveContainer's Bundle ID“ einschalten, falls StikDebug die App nicht zurückfindet.
-4. Die App starten und „StikDebug öffnen & JIT aktivieren“ antippen. Aktiviere JIT in StikDebug, kehre zurück und tippe „JIT jetzt testen“.
+1. Die IPA aus dem GitHub-Actions-Artefakt herunterladen und in LiveContainer importieren.
+2. Für JITCheck **Launch with JIT** einschalten und `universal.js` als JIT-Launch-Skript auswählen.
+3. JITCheck direkt über LiveContainer starten. Nicht erst in JITCheck zu StikDebug wechseln und danach den Testknopf drücken: Das Skript kann zu diesem Zeitpunkt bereits vom Prozess getrennt sein.
+4. Die App zeigt nach dem Start an, ob der Testcode `42` zurückgegeben hat oder welche Vorbedingung fehlte.
 
-Die App prüft `CS_DEBUGGED`, bevor sie den Breakpoint an `universal.js` sendet. Ohne aktiven Debugger wird der Breakpoint nicht ausgeführt, damit die App nicht durch einen unbehandelten `brk` abstürzt.
-
-Auf iOS 27 ist der echte BRK/JIT-Test vorübergehend gesperrt. Es gibt StikDebug-Berichte über fehlgeschlagenes Debugger-Attach auf iOS 27; ein unbehandelter Trap kann die App beenden.
+Der Test wartet bis zu fünf Sekunden auf den Debugger-Attach. Ohne erkannten Debugger wird kein `BRK` ausgeführt. Bei einem JIT-Start mit aktivem Debugger führt die App den Breakpoint-Test einmalig während des Starts aus.
 
 ## Build
 
-Der GitHub-Actions-Workflow unter `.github/workflows/ios-build.yml` baut auf einem macOS-Runner und legt `JITCheck.ipa` als Actions-Artefakt ab. Dazu den Inhalt dieses Ordners in ein GitHub-Repository pushen und den Workflow unter **Actions → Build iOS app → Run workflow** starten. Die IPA ist unsigniert; LiveContainer muss sie beim Import passend signieren. Dieses Projekt wurde auf Linux erstellt; dort sind weder Xcode noch iOS SDK verfügbar, daher kann hier keine iOS-App/IPA gelinkt werden.
+Der GitHub-Actions-Workflow unter `.github/workflows/ios-build.yml` baut auf einem macOS-Runner und legt `JITCheck.ipa` als Actions-Artefakt ab. Die IPA ist unsigniert; LiveContainer muss sie beim Import passend signieren. Das Projekt wurde auf Linux erstellt; dort sind weder Xcode noch iOS SDK verfügbar, daher kann hier keine iOS-App/IPA gelinkt werden.

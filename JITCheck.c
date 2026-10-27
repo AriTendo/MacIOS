@@ -27,7 +27,15 @@ int32_t JITCheckRun(void) {
 #if !defined(__arm64__)
     return -1;
 #else
+    // LiveContainer/StikDebug may attach just after the first app frame. Wait
+    // briefly for that launch-time attach; do not send an unhandled BRK if it
+    // never arrives.
+    for (unsigned int attempt = 0; attempt < 50 && !debugged(); ++attempt) {
+        usleep(100000);
+    }
     if (!debugged()) return -2;
+    // Give universal.js a moment to enter its breakpoint handler after attach.
+    usleep(300000);
 
     const size_t pageSize = (size_t)getpagesize();
     void *page = mmap(NULL, pageSize, PROT_READ | PROT_WRITE,
